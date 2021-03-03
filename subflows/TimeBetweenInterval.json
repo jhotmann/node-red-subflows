@@ -1,0 +1,160 @@
+[
+  {
+      "id": "a5d9a590.a71b08",
+      "type": "subflow",
+      "name": "TimeBetweenInterval",
+      "info": "Check if a date is within a certain time interval.\n\nIf the `Interval Start Hour` and `Interval Start Minute` are both zero that means midnight today. If the `Interval End Hour` and `Interval End Minute` are both zero that means midnight tomorrow.\n\nIf the `Msg Date Property` is set, that property's value will be used as the comparison date, otherwise now is used.\n\nCheck `Use Date Property's Date` to use the Msg Date Property's date instead of today (just check that the time is within the interval and not necessarily that it's today).",
+      "category": "",
+      "in": [
+          {
+              "x": 60,
+              "y": 80,
+              "wires": [
+                  {
+                      "id": "2c919150.a64bce"
+                  }
+              ]
+          }
+      ],
+      "out": [
+          {
+              "x": 300,
+              "y": 60,
+              "wires": [
+                  {
+                      "id": "2c919150.a64bce",
+                      "port": 0
+                  }
+              ]
+          },
+          {
+              "x": 300,
+              "y": 100,
+              "wires": [
+                  {
+                      "id": "2c919150.a64bce",
+                      "port": 1
+                  }
+              ]
+          }
+      ],
+      "env": [
+          {
+              "name": "START_HOUR",
+              "type": "num",
+              "value": "0",
+              "ui": {
+                  "icon": "font-awesome/fa-clock-o",
+                  "label": {
+                      "en-US": "Interval Start Hour"
+                  },
+                  "type": "spinner",
+                  "opts": {
+                      "min": 0,
+                      "max": 23
+                  }
+              }
+          },
+          {
+              "name": "START_MINUTE",
+              "type": "num",
+              "value": "0",
+              "ui": {
+                  "icon": "font-awesome/fa-clock-o",
+                  "label": {
+                      "en-US": "Interval Start Minute"
+                  },
+                  "type": "spinner",
+                  "opts": {
+                      "min": 0,
+                      "max": 59
+                  }
+              }
+          },
+          {
+              "name": "END_HOUR",
+              "type": "num",
+              "value": "0",
+              "ui": {
+                  "icon": "font-awesome/fa-clock-o",
+                  "label": {
+                      "en-US": "Interval End Hour"
+                  },
+                  "type": "spinner",
+                  "opts": {
+                      "min": 0,
+                      "max": 23
+                  }
+              }
+          },
+          {
+              "name": "END_MINUTE",
+              "type": "num",
+              "value": "0",
+              "ui": {
+                  "icon": "font-awesome/fa-clock-o",
+                  "label": {
+                      "en-US": "Interval End Minute"
+                  },
+                  "type": "spinner",
+                  "opts": {
+                      "min": 0,
+                      "max": 59
+                  }
+              }
+          },
+          {
+              "name": "DATE_PROPERTY",
+              "type": "str",
+              "value": "",
+              "ui": {
+                  "icon": "font-awesome/fa-code",
+                  "label": {
+                      "en-US": "Msg Date Property"
+                  },
+                  "type": "input",
+                  "opts": {
+                      "types": [
+                          "str"
+                      ]
+                  }
+              }
+          },
+          {
+              "name": "OVERRIDE_DAY",
+              "type": "bool",
+              "value": "false",
+              "ui": {
+                  "icon": "font-awesome/fa-calendar",
+                  "label": {
+                      "en-US": "Use Date Property's Date"
+                  },
+                  "type": "checkbox"
+              }
+          }
+      ],
+      "color": "#C0C0C0",
+      "outputLabels": [
+          "Time Between Interval",
+          "Time Not Between Interval"
+      ],
+      "icon": "font-awesome/fa-clock-o"
+  },
+  {
+      "id": "2c919150.a64bce",
+      "type": "function",
+      "z": "a5d9a590.a71b08",
+      "name": "",
+      "func": "const datePropertyOverride = env.get('DATE_PROPERTY');\nconst now = new Date();\n\nlet dateToCompare = new Date(now.getTime());\nif (datePropertyOverride) {\n    node.warn('Date Property set, overriding date');\n    try {\n        const propValue = datePropertyOverride.replace(/^msg\\./, '').split('.').reduce((o,i)=>o[i], msg);\n        if (propValue) dateToCompare = new Date(propValue);\n        else node.error(`Couldn't access property ${datePropertyOverride}: ${e}`, msg);\n    } catch (e) {\n        node.error(`Couldn't access property ${datePropertyOverride}: ${e}`, msg);\n    }\n}\n\nlet start;\nlet end;\nif (datePropertyOverride && env.get('OVERRIDE_DAY')) {\n    start = new Date(dateToCompare.getFullYear(), dateToCompare.getMonth(), dateToCompare.getDate(), env.get('START_HOUR'), env.get('START_MINUTE'));\n    end = new Date(dateToCompare.getFullYear(), dateToCompare.getMonth(), dateToCompare.getDate(), env.get('END_HOUR'), env.get('END_MINUTE'));\n} else {\n    start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), env.get('START_HOUR'), env.get('START_MINUTE'));\n    end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), env.get('END_HOUR'), env.get('END_MINUTE'));\n}\nlet endTime = end.getTime();\nif (env.get('END_HOUR') === 0 && env.get('END_MINUTE') === 0) endTime += (24 * 60 * 60 * 1000);\n\nif (start.getTime() <= dateToCompare.getTime() && endTime >= dateToCompare.getTime()) {\n    return [msg, null];\n}\nreturn [null, msg];",
+      "outputs": 2,
+      "noerr": 0,
+      "initialize": "",
+      "finalize": "",
+      "x": 180,
+      "y": 80,
+      "wires": [
+          [],
+          []
+      ]
+  }
+]

@@ -124,7 +124,7 @@
       "type": "function",
       "z": "1bb462c4.15bbc5",
       "name": "Set Next URL (Observations)",
-      "func": "msg.url = msg.payload.features[0].id + '/observations';\nmsg.headers = {};\nmsg.headers['User-Agent'] = 'node-red-jhot';\nreturn msg;",
+      "func": "msg.url = msg.payload.features[0].id + '/observations';\nmsg.headers = {};\nmsg.headers['User-Agent'] = 'node-red-subflow-weathergovobservations';\nreturn msg;",
       "outputs": 1,
       "noerr": 0,
       "initialize": "",

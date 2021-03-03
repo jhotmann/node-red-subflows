@@ -1,0 +1,138 @@
+[
+  {
+      "id": "afe79016.bc3dc8",
+      "type": "subflow",
+      "name": "WeatherGovForecast",
+      "info": "## Inputs\n`Forecast URL` - manually set the forecast URL to something like `https://api.weather.gov/gridpoints/[Station Code]/[Grid X],[Grid Y]`.\n\nThe following allow you to make multiple API calls and combine the results into a single message with a `join` node.\n\n`Index` - If you're making calls to forecast and another endpoint, like observations, set to a unique index.\n\n`Count` - If you're making calls to forecast and another endpoint, set to the total number of simulateous calls.\n\n## Output\n`msg.payload` - The current forecast for the supplied grid. If using a join, the data will be at `msg.payload.forecast`.",
+      "category": "",
+      "in": [
+          {
+              "x": 80,
+              "y": 60,
+              "wires": [
+                  {
+                      "id": "e2024441.b5c4f"
+                  }
+              ]
+          }
+      ],
+      "out": [
+          {
+              "x": 720,
+              "y": 60,
+              "wires": [
+                  {
+                      "id": "cb8d8f70.c923a",
+                      "port": 0
+                  }
+              ]
+          }
+      ],
+      "env": [
+          {
+              "name": "FORECAST_URL",
+              "type": "str",
+              "value": "",
+              "ui": {
+                  "icon": "font-awesome/fa-link",
+                  "label": {
+                      "en-US": "Forecast URL"
+                  },
+                  "type": "input",
+                  "opts": {
+                      "types": [
+                          "str"
+                      ]
+                  }
+              }
+          },
+          {
+              "name": "FORECAST_INDEX",
+              "type": "num",
+              "value": "0",
+              "ui": {
+                  "icon": "font-awesome/fa-sort-numeric-asc",
+                  "label": {
+                      "en-US": "Index"
+                  },
+                  "type": "spinner",
+                  "opts": {
+                      "min": 0
+                  }
+              }
+          },
+          {
+              "name": "FORECAST_COUNT",
+              "type": "num",
+              "value": "0",
+              "ui": {
+                  "icon": "font-awesome/fa-sort-numeric-asc",
+                  "label": {
+                      "en-US": "Count"
+                  },
+                  "type": "spinner",
+                  "opts": {
+                      "min": 0
+                  }
+              }
+          }
+      ],
+      "color": "#C7E9C0",
+      "icon": "font-awesome/fa-cloud"
+  },
+  {
+      "id": "e2024441.b5c4f",
+      "type": "function",
+      "z": "afe79016.bc3dc8",
+      "name": "Set Forecast URL",
+      "func": "if (msg && msg.payload && msg.payload.properties && msg.payload.properties.forecastGridData) {\n    msg.url = msg.payload.properties.forecastGridData;\n} else {\n    msg.url = env.get('FORECAST_URL');\n}\nmsg.headers = {};\nmsg.headers['User-Agent'] = 'node-red-subflow-weathergovobservations';\nreturn msg;",
+      "outputs": 1,
+      "noerr": 0,
+      "initialize": "",
+      "finalize": "",
+      "x": 230,
+      "y": 60,
+      "wires": [
+          [
+              "23b0d907.1a0856"
+          ]
+      ]
+  },
+  {
+      "id": "23b0d907.1a0856",
+      "type": "http request",
+      "z": "afe79016.bc3dc8",
+      "name": "Get Forecast",
+      "method": "GET",
+      "ret": "obj",
+      "paytoqs": "ignore",
+      "url": "",
+      "tls": "",
+      "persist": false,
+      "proxy": "",
+      "authType": "",
+      "x": 430,
+      "y": 60,
+      "wires": [
+          [
+              "cb8d8f70.c923a"
+          ]
+      ]
+  },
+  {
+      "id": "cb8d8f70.c923a",
+      "type": "function",
+      "z": "afe79016.bc3dc8",
+      "name": "Parts",
+      "func": "const count = env.get('FORECAST_COUNT');\n\nif (count) {\n    msg.parts = {\n        id: 'weather-gov-split',\n        index: env.get('FORECAST_INDEX'),\n        count: count,\n        type: 'object',\n        key: 'forecast'\n    };\n}\n\nreturn msg;",
+      "outputs": 1,
+      "noerr": 0,
+      "initialize": "",
+      "finalize": "",
+      "x": 590,
+      "y": 60,
+      "wires": [
+          []
+      ]
+  }
+]

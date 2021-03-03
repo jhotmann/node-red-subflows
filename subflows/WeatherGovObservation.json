@@ -1,0 +1,177 @@
+[
+  {
+      "id": "1bb462c4.15bbc5",
+      "type": "subflow",
+      "name": "WeatherGovObservations",
+      "info": "## Inputs\n`Observation URL` - manually set the observation station URL. Preferrably, this will be chained after a WeatherGovLocation node and you won't need to set this.\n\nThe following allow you to make multiple API calls and combine the results into a single message with a `join` node.\n\n`Index` - If you're making calls to observations and another endpoint, like forecast, set to a unique index.\n\n`Count` - If you're making calls to observations and another endpoint, set to the total number of simulateous calls.\n\n## Output\n`msg.payload` - The current observations for the supplied grid. If using a join, the data will be at `msg.payload.observations`.",
+      "category": "",
+      "in": [
+          {
+              "x": 60,
+              "y": 60,
+              "wires": [
+                  {
+                      "id": "17c52b68.bc924d"
+                  }
+              ]
+          }
+      ],
+      "out": [
+          {
+              "x": 440,
+              "y": 120,
+              "wires": [
+                  {
+                      "id": "18d116d8.7db489",
+                      "port": 0
+                  }
+              ]
+          }
+      ],
+      "env": [
+          {
+              "name": "OBSERVATION_URL",
+              "type": "str",
+              "value": "",
+              "ui": {
+                  "icon": "font-awesome/fa-link",
+                  "label": {
+                      "en-US": "Observation URL"
+                  },
+                  "type": "input",
+                  "opts": {
+                      "types": [
+                          "str"
+                      ]
+                  }
+              }
+          },
+          {
+              "name": "OBSERVATION_INDEX",
+              "type": "num",
+              "value": "0",
+              "ui": {
+                  "icon": "font-awesome/fa-sort-numeric-asc",
+                  "label": {
+                      "en-US": "Index"
+                  },
+                  "type": "spinner",
+                  "opts": {
+                      "min": 0
+                  }
+              }
+          },
+          {
+              "name": "OBSERVATION_COUNT",
+              "type": "num",
+              "value": "0",
+              "ui": {
+                  "icon": "font-awesome/fa-sort-numeric-asc",
+                  "label": {
+                      "en-US": "Count"
+                  },
+                  "type": "spinner",
+                  "opts": {
+                      "min": 0
+                  }
+              }
+          }
+      ],
+      "color": "#C7E9C0",
+      "icon": "font-awesome/fa-cloud"
+  },
+  {
+      "id": "17c52b68.bc924d",
+      "type": "function",
+      "z": "1bb462c4.15bbc5",
+      "name": "Set Next URL (Observation Station)",
+      "func": "if (msg && msg.payload && msg.payload.properties && msg.payload.properties.observationStations) {\n    msg.url = msg.payload.properties.observationStations;\n} else {\n    msg.url = env.get('OBSERVATION_URL');\n}\nmsg.headers = {};\nmsg.headers['User-Agent'] = 'node-red-subflow-weathergovobservations';\nreturn msg;",
+      "outputs": 1,
+      "noerr": 0,
+      "initialize": "",
+      "finalize": "",
+      "x": 260,
+      "y": 60,
+      "wires": [
+          [
+              "d6798576.feb4a8"
+          ]
+      ]
+  },
+  {
+      "id": "d6798576.feb4a8",
+      "type": "http request",
+      "z": "1bb462c4.15bbc5",
+      "name": "Get Data",
+      "method": "GET",
+      "ret": "obj",
+      "paytoqs": "ignore",
+      "url": "",
+      "tls": "",
+      "persist": false,
+      "proxy": "",
+      "authType": "",
+      "x": 500,
+      "y": 60,
+      "wires": [
+          [
+              "8002d00e.efca58"
+          ]
+      ]
+  },
+  {
+      "id": "8002d00e.efca58",
+      "type": "function",
+      "z": "1bb462c4.15bbc5",
+      "name": "Set Next URL (Observations)",
+      "func": "msg.url = msg.payload.features[0].id + '/observations';\nmsg.headers = {};\nmsg.headers['User-Agent'] = 'node-red-jhot';\nreturn msg;",
+      "outputs": 1,
+      "noerr": 0,
+      "initialize": "",
+      "finalize": "",
+      "x": 720,
+      "y": 60,
+      "wires": [
+          [
+              "edc411d8.d96048"
+          ]
+      ]
+  },
+  {
+      "id": "edc411d8.d96048",
+      "type": "http request",
+      "z": "1bb462c4.15bbc5",
+      "name": "Get Data",
+      "method": "GET",
+      "ret": "obj",
+      "paytoqs": "ignore",
+      "url": "",
+      "tls": "",
+      "persist": false,
+      "proxy": "",
+      "authType": "",
+      "x": 180,
+      "y": 120,
+      "wires": [
+          [
+              "18d116d8.7db489"
+          ]
+      ]
+  },
+  {
+      "id": "18d116d8.7db489",
+      "type": "function",
+      "z": "1bb462c4.15bbc5",
+      "name": "Parts",
+      "func": "const count = env.get('OBSERVATION_COUNT');\n\nif (count) {\n    msg.parts = {\n        id: 'weather-gov-split',\n        index: env.get('OBSERVATION_INDEX'),\n        count: count,\n        type: 'object',\n        key: 'observation'\n    };\n}\n\nreturn msg;",
+      "outputs": 1,
+      "noerr": 0,
+      "initialize": "",
+      "finalize": "",
+      "x": 330,
+      "y": 120,
+      "wires": [
+          []
+      ]
+  }
+]

@@ -1,0 +1,107 @@
+[
+  {
+      "id": "fffe012c.7850a",
+      "type": "subflow",
+      "name": "WeatherGovLocation",
+      "info": "## Inputs\n`Latitude` - the latitude for the forecast. Can be overridden by `msg.payload.latitude` or `msg.data.attributes.latitude` (for use with Home Assistant Zones).\n\n`Longitude` - the longitude for the forecast. Can be overridden by `msg.payload.longitude` or `msg.data.attributes.longitude`.\n\n## Output\n`msg.payload` - The observation stations and other data for that location. Can be input directly into a forecast or observation node or both with a split/merge.",
+      "category": "",
+      "in": [
+          {
+              "x": 60,
+              "y": 120,
+              "wires": [
+                  {
+                      "id": "395af0c1.65c8c"
+                  }
+              ]
+          }
+      ],
+      "out": [
+          {
+              "x": 620,
+              "y": 120,
+              "wires": [
+                  {
+                      "id": "b7a49ac4.5a85c8",
+                      "port": 0
+                  }
+              ]
+          }
+      ],
+      "env": [
+          {
+              "name": "LAT",
+              "type": "num",
+              "value": "",
+              "ui": {
+                  "icon": "font-awesome/fa-map-marker",
+                  "label": {
+                      "en-US": "Latitude"
+                  },
+                  "type": "input",
+                  "opts": {
+                      "types": [
+                          "num"
+                      ]
+                  }
+              }
+          },
+          {
+              "name": "LON",
+              "type": "num",
+              "value": "",
+              "ui": {
+                  "icon": "font-awesome/fa-map-marker",
+                  "label": {
+                      "en-US": "Longitude"
+                  },
+                  "type": "input",
+                  "opts": {
+                      "types": [
+                          "num"
+                      ]
+                  }
+              }
+          }
+      ],
+      "color": "#C7E9C0",
+      "icon": "font-awesome/fa-cloud"
+  },
+  {
+      "id": "395af0c1.65c8c",
+      "type": "function",
+      "z": "fffe012c.7850a",
+      "name": "Set URL with coordinates",
+      "func": "const latEnv = env.get('LAT');\nconst lonEnv = env.get('LON');\n\nlet lat;\nlet lon;\nif (msg && msg.payload && msg.payload.latitude) {\n    lat = msg.payload.latitude;\n} else if (msg && msg.data && msg.data.attributes && msg.data.attributes.latitude) {\n    lat = msg.data.attributes.latitude;\n} else if (latEnv) {\n    lat = latEnv;\n}\nif (msg && msg.payload && msg.payload.longitude) {\n    lon = msg.payload.longitude;\n} else if (msg && msg.data && msg.data.attributes && msg.data.attributes.longitude) {\n    lon = msg.data.attributes.longitude;\n} else if (lonEnv) {\n    lon = lonEnv;\n}\n\nif (!lat || !lon) {\n    node.error('Latitude and Longitude must be set', msg);\n}\n\nmsg.url = 'https://api.weather.gov/points/' + lat + \",\" + lon;\nmsg.headers = {};\nmsg.headers['User-Agent'] = 'node-red-subflow-weathergovobservations';\nreturn msg;",
+      "outputs": 1,
+      "noerr": 0,
+      "initialize": "",
+      "finalize": "",
+      "x": 230,
+      "y": 120,
+      "wires": [
+          [
+              "b7a49ac4.5a85c8"
+          ]
+      ]
+  },
+  {
+      "id": "b7a49ac4.5a85c8",
+      "type": "http request",
+      "z": "fffe012c.7850a",
+      "name": "Get location data",
+      "method": "GET",
+      "ret": "obj",
+      "paytoqs": false,
+      "url": "",
+      "tls": "",
+      "persist": false,
+      "proxy": "",
+      "authType": "",
+      "x": 470,
+      "y": 120,
+      "wires": [
+          []
+      ]
+  }
+]

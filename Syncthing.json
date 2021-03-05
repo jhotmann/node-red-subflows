@@ -1,0 +1,180 @@
+[
+  {
+      "id": "1d2d979.a1cfc68",
+      "type": "subflow",
+      "name": "Syncthing",
+      "info": "## Inputs\n`Action` - select an action\n\n`Host` - the Syncthing host including protocol and port like `http://ip-or-hostname:8384`\n\n`API Key` - your API key found at *Actions > Settings > API Key*\n\n`Device ID` - the device you want to perform the action on (optional). If not specified, all devices will be affected. Device ID can by found by clicking *Actions > Show ID* or clicking *Edit* on a remote device.\n\n## Outputs\nThe API response",
+      "category": "",
+      "in": [
+          {
+              "x": 80,
+              "y": 80,
+              "wires": [
+                  {
+                      "id": "c826b9ef.3594b8"
+                  }
+              ]
+          }
+      ],
+      "out": [
+          {
+              "x": 540,
+              "y": 80,
+              "wires": [
+                  {
+                      "id": "a842cb74.264528",
+                      "port": 0
+                  }
+              ]
+          }
+      ],
+      "env": [
+          {
+              "name": "SYNCTHING_ACTION",
+              "type": "str",
+              "value": "pause",
+              "ui": {
+                  "icon": "font-awesome/fa-list-alt",
+                  "label": {
+                      "en-US": "Action"
+                  },
+                  "type": "select",
+                  "opts": {
+                      "opts": [
+                          {
+                              "l": {
+                                  "en-US": "Pause"
+                              },
+                              "v": "pause"
+                          },
+                          {
+                              "l": {
+                                  "en-US": "Resume"
+                              },
+                              "v": "resume"
+                          }
+                      ]
+                  }
+              }
+          },
+          {
+              "name": "SYNCTHING_HOST",
+              "type": "str",
+              "value": "http://syncthing:8384",
+              "ui": {
+                  "icon": "font-awesome/fa-link",
+                  "label": {
+                      "en-US": "Host"
+                  },
+                  "type": "input",
+                  "opts": {
+                      "types": [
+                          "str"
+                      ]
+                  }
+              }
+          },
+          {
+              "name": "SYNCTHING_API_KEY",
+              "type": "str",
+              "value": "API key here",
+              "ui": {
+                  "icon": "font-awesome/fa-key",
+                  "label": {
+                      "en-US": "API Key"
+                  },
+                  "type": "input",
+                  "opts": {
+                      "types": [
+                          "str"
+                      ]
+                  }
+              }
+          },
+          {
+              "name": "SYNCTHING_DEVICE_ID",
+              "type": "str",
+              "value": "ABCDEFG-1234567-...",
+              "ui": {
+                  "icon": "font-awesome/fa-id-card-o",
+                  "label": {
+                      "en-US": "Device ID"
+                  },
+                  "type": "input",
+                  "opts": {
+                      "types": [
+                          "str"
+                      ]
+                  }
+              }
+          }
+      ],
+      "color": "#E2D96E",
+      "icon": "font-awesome/fa-refresh",
+      "status": {
+          "x": 540,
+          "y": 140,
+          "wires": [
+              {
+                  "id": "5cdf154a.807924",
+                  "port": 0
+              }
+          ]
+      }
+  },
+  {
+      "id": "c826b9ef.3594b8",
+      "type": "function",
+      "z": "1d2d979.a1cfc68",
+      "name": "Set Params",
+      "func": "let apiPath;\nswitch (env.get('SYNCTHING_ACTION')) {\n    case 'resume': {\n        apiPath = 'rest/system/resume';\n        msg.method = 'POST';\n        break;\n    }\n    default: {\n        apiPath = 'rest/system/pause';\n        msg.method = 'POST';\n    }\n}\nmsg.url = `${env.get('SYNCTHING_HOST')}/${apiPath}`;\nmsg.headers = {\n    \"X-API-Key\": env.get('SYNCTHING_API_KEY')\n};\n\nlet devId = env.get('SYNCTHING_DEVICE_ID');\nif (devId) msg.headers.device = devId;\n\nreturn msg;",
+      "outputs": 1,
+      "noerr": 0,
+      "initialize": "",
+      "finalize": "",
+      "x": 210,
+      "y": 80,
+      "wires": [
+          [
+              "a842cb74.264528"
+          ]
+      ]
+  },
+  {
+      "id": "a842cb74.264528",
+      "type": "http request",
+      "z": "1d2d979.a1cfc68",
+      "name": "Syncthing API",
+      "method": "use",
+      "ret": "txt",
+      "paytoqs": "ignore",
+      "url": "",
+      "tls": "",
+      "persist": false,
+      "proxy": "",
+      "authType": "",
+      "x": 400,
+      "y": 80,
+      "wires": [
+          [
+              "5cdf154a.807924"
+          ]
+      ]
+  },
+  {
+      "id": "5cdf154a.807924",
+      "type": "function",
+      "z": "1d2d979.a1cfc68",
+      "name": "Set Status",
+      "func": "const d = new Date();\nif (msg.statusCode === 200) {\n    msg.payload = {fill:\"green\",shape:\"dot\",text:`${d.toLocaleString()} Success`};\n} else {\n    msg.payload = {fill:\"red\",shape:\"dot\",text:`${d.toLocaleString()} ${msg.statusCode}`};\n}\nreturn msg;",
+      "outputs": 1,
+      "noerr": 0,
+      "initialize": "",
+      "finalize": "",
+      "x": 390,
+      "y": 140,
+      "wires": [
+          []
+      ]
+  }
+]

@@ -60,6 +60,12 @@ The following allow you to make multiple API calls and combine the results into 
 ### Output
 `msg.payload` - The current observations for the supplied grid. If using a join, the data will be at `msg.payload.observations`.
 
+## [Syncthing API](subflows/Syncthing.json)
+
+Control a Syncthing instance via API. Currently just pause and resume is implemented.
+
+![](img/syncthing.png)
+
 <!--## [](subflows/)
 
 ![](img/)

@@ -1,0 +1,94 @@
+[{
+  "id": "f5c54d6d7a01e93c",
+  "type": "subflow",
+  "name": "Get Prop",
+  "info": "## Get a property value\n\nSupply a property to get the value in all caps like `PROPERTY_NAME`. The Get Prop node will then check the following places for a value (in this order):\n\n- `msg.[MESSAGE_PROP]['property_name']` - A value passed on the incoming message.\n- `env.get('PROPERTY_NAME')` - the value supplied in the node configuration\n- `global.get('PROPERTY_NAME')` - a global variable (off by default)\n\nThe value will be passed along at `msg.data.property_name`.",
+  "category": "",
+  "in": [{
+    "x": 60,
+    "y": 60,
+    "wires": [{
+      "id": "f26e080281d18205"
+    }]
+  }],
+  "out": [{
+    "x": 300,
+    "y": 60,
+    "wires": [{
+      "id": "f26e080281d18205",
+      "port": 0
+    }]
+  }],
+  "env": [{
+    "name": "PROP_NAME",
+    "type": "str",
+    "value": "UPPERCASE_PROP_NAME",
+    "ui": {
+      "icon": "font-awesome/fa-angle-right",
+      "label": {
+        "en-US": "Property Name"
+      },
+      "type": "input",
+      "opts": {
+        "types": ["str"]
+      }
+    }
+  }, {
+    "name": "ALLOW_GLOBAL",
+    "type": "bool",
+    "value": "false",
+    "ui": {
+      "icon": "font-awesome/fa-globe",
+      "label": {
+        "en-US": "Allow Globals"
+      },
+      "type": "input",
+      "opts": {
+        "types": ["bool"]
+      }
+    }
+  }, {
+    "name": "MESSAGE_PROP",
+    "type": "str",
+    "value": "data",
+    "ui": {
+      "icon": "font-awesome/fa-list",
+      "label": {
+        "en-US": "Message Property"
+      },
+      "type": "select",
+      "opts": {
+        "opts": [{
+          "l": {
+            "en-US": "payload"
+          },
+          "v": "payload"
+        }, {
+          "l": {
+            "en-US": "data"
+          },
+          "v": "data"
+        }]
+      }
+    }
+  }],
+  "meta": {},
+  "color": "#F3B567",
+  "icon": "font-awesome/fa-question-circle-o"
+}, {
+  "id": "f26e080281d18205",
+  "type": "function",
+  "z": "f5c54d6d7a01e93c",
+  "name": "",
+  "func": "const propName = env.get('PROP_NAME');\nconst msgProp = env.get('MESSAGE_PROP');\n\nif (!msg[msgProp]) msg[msgProp] = {};\nmsg[msgProp][propName.toLowerCase()] = getProp(propName, env.get('ALLOW_GLOBAL'));\nreturn msg;\n\nfunction getProp(envProp, allowGlobal) {\n    const dataProp = envProp.toLowerCase();\n    if (msg[msgProp][dataProp]) {\n        return msg[msgProp][dataProp];\n    } else if (env.get(envProp)) {\n        return env.get(envProp);\n    } else if (allowGlobal && global.get(envProp)) {\n        return global.get(envProp);\n    }\n    return null;\n}",
+  "outputs": 1,
+  "noerr": 0,
+  "initialize": "",
+  "finalize": "",
+  "libs": [],
+  "x": 180,
+  "y": 60,
+  "wires": [
+    []
+  ]
+}]

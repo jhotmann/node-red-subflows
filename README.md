@@ -1,6 +1,14 @@
 # node-red-subflows
 My Personal Subflows That May Be Helpful
 
+## [Get Prop](subflows/GetProp.json) - a subflow for your other subflows
+Get a configuration property from a prioritized list of places
+1. `msg.data` or any other `msg` property (configurable)
+1. `env` (subflow configuration)
+1. `global` (if allowed, off by default)
+
+For example, let's say we have a subflow that sends a notification via 3rd party service (Pushover, Gotify, etc), and the subflow has configuration options for the title and body of the message. Assuming the title has a property name of `TITLE` in the subflow properties, Get Prop would look first at `msg.data.title`, then `env.get('TITLE')`, then `global.get('TITLE')`. This allows you to set defaults in global configuration or the subflow instance's properties, while allowing for overrides with the incoming `msg` data.
+
 ## [Time Between Interval](subflows/TimeBetweenInterval.json)
 Check if a date is within a certain time interval.
 
